@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Startpage</title>
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <style>
+            body {
+                background-color: rgb(29, 29, 29);
+                width: 98.8%;
+            }
+            input {
+                background-color: rgb(29, 29, 29);
+                border-color: rgb(29, 29, 29);
+                color: lightgray;
+                width: 100%;
+            }
+            p {
+                color: lightgray;
+            }
+            details {
+                color: lightgray;
+            }
+        </style>
+    </head>
+    <body>
+        <form id="form">
+            <input id="input" type="text" autofocus />
+        </form>
+        <details>
+            <summary>Info</summary>
+            <div id="div"></div>
+        </details>
+        <script>
+            const input = document.getElementById("input")
+            const form = document.getElementById("form")
+            form.onsubmit = submit
+            const info = document.getElementById("div")
+
+            var data
+            fetch('./data.json').then((response) => response.json())
+                .then(function(json) {
+                    data = json
+
+                    for (key in data.items) {
+                        var forInsert = document.createElement("p")
+                        forInsert.innerHTML = data.items[key].shortcut + " - " + data.items[key].description
+                        info.appendChild(forInsert)
+                    }
+                })
+
+            function submit(event) {
+                input.value = input.value + " "
+                var domain = input.value.split(" ", 1)
+                var args = input.value.replace(domain + " ", "")
+                var url = domain
+                for (key in data.items) {
+                    console.log(data.items[key])
+                    if (domain[0] == data.items[key].shortcut) {
+                        url = data.items[key].url + args
+                    }
+                }
+                if (url == domain && !url.toString().includes(".")) {
+                    // todo add error message
+                    input.value = url
+                    return false
+                }
+                if (!url.toString().startsWith("https://") && !url.toString().startsWith("http://")) {
+                    url = "https://" + url
+                }
+                window.open(url, "_self")
+                input.value = ""
+                event.preventDefault()
+            }
+        </script>
+    </body>
+</html>
