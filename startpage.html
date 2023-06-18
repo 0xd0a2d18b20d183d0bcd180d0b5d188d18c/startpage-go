@@ -37,13 +37,13 @@
             const info = document.getElementById("div")
 
             var data
-            fetch('./data.json').then((response) => response.json())
+            fetch('/items').then((response) => response.json())
                 .then(function(json) {
                     data = json
 
-                    for (key in data.items) {
+                    for (key in data.Value) {
                         var forInsert = document.createElement("p")
-                        forInsert.innerHTML = data.items[key].shortcut + " - " + data.items[key].description
+                        forInsert.innerHTML = data.Value[key].Shortcut + " - " + data.Value[key].Desc
                         info.appendChild(forInsert)
                     }
                 })
@@ -53,10 +53,10 @@
                 var domain = input.value.split(" ", 1)
                 var args = input.value.replace(domain + " ", "")
                 var url = domain
-                for (key in data.items) {
-                    console.log(data.items[key])
-                    if (domain[0] == data.items[key].shortcut) {
-                        url = data.items[key].url + args
+                for (key in data.Value) {
+                    console.log(data.Value[key])
+                    if (domain[0] == data.Value[key].Shortcut) {
+                        url = data.Value[key].URL + args
                     }
                 }
                 if (url == domain && !url.toString().includes(".")) {
