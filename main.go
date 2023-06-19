@@ -32,7 +32,6 @@ type Wrapper struct {
 func getRoot(w http.ResponseWriter, r *http.Request) {
 	dat, err := os.ReadFile("startpage.html")
 	check(err)
-	fmt.Printf("That's root")
 	io.WriteString(w, string(dat))
 }
 
@@ -65,21 +64,47 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 
 		db.Close()
 	case "PUT":
+		db := getDb()
+		var item Item
+		err := json.NewDecoder(r.Body).Decode(&item)
+		check(err)
+		tx := db.MustBegin()
+		tx.MustExec("UPDATE items SET url = $1, desc = $2 WHERE shortcut = $3", item.URL, item.Desc, item.Shortcut)
+		tx.Commit()
+		db.Close()
 	case "DELETE":
+		db := getDb()
+		var item Item
+		err := json.NewDecoder(r.Body).Decode(&item)
+		check(err)
+		tx := db.MustBegin()
+		tx.MustExec("DELETE FROM items WHERE shortcut = $1", item.Shortcut)
+		tx.Commit()
+		db.Close()
 	default:
 		fmt.Fprint(w, "Sorry, wrong http request type")
 	}
 }
 
 func main() {
-	fmt.Printf("It's working")
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", getRoot)
 	mux.HandleFunc("/items", getItems)
 
 	err := http.ListenAndServe(":3333", mux)
 	check(err)
+}
+
+func getDb() *sqlx.DB {
+	db, err := sqlx.Open("sqlite3", "database.db")
+	check(err)
+	return db
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
 
 // func createDb() {
@@ -101,15 +126,3 @@ func main() {
 
 // 	db.Close()
 // }
-
-func getDb() *sqlx.DB {
-	db, err := sqlx.Open("sqlite3", "database.db")
-	check(err)
-	return db
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
