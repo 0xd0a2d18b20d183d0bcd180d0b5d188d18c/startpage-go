@@ -12,12 +12,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Check is db file there
-// If yes, read and prepare
-// If not, create and put examples
-// CRUD data
-// Authentication by uuid at url's parameters (for first iteration)
-
 type Item struct {
 	Id       int    `db:"id"`
 	URL      string `db:"url"`
@@ -106,23 +100,3 @@ func check(e error) {
 		panic(e)
 	}
 }
-
-// func createDb() {
-// 	_, err := os.Create("database.db")
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-// 	fmt.Printf("File created")
-// }
-
-// func isDbExists() {
-// 	fmt.Printf("Here")
-// 	db, err := sql.Open("sqlite3", "database.db")
-// 	if err != nil {
-// 		fmt.Printf("Miss file")
-// 		panic(err)
-// 	}
-
-// 	db.Close()
-// }
