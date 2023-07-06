@@ -17,6 +17,7 @@ type Item struct {
 	URL      string `db:"url"`
 	Shortcut string `db:"shortcut"`
 	Desc     string `db:"desc"`
+	UUID     string `db:"uuid"`
 }
 
 type Wrapper struct {
@@ -33,10 +34,10 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		db := getDb()
+		query := "SELECT * FROM items i WHERE i.uuid='" + r.Header.Get("X-User-UUID") + "'"
 
 		item := []Item{}
-		db.Select(&item, "SELECT * FROM items")
-		// fmt.Printf("%#v\n", item)
+		db.Select(&item, query)
 		wrapper := &Wrapper{item}
 
 		b, err := json.Marshal(wrapper)
@@ -53,7 +54,7 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&item)
 		check(err)
 		tx := db.MustBegin()
-		tx.MustExec("INSERT INTO items (url, shortcut, desc) VALUES ($1, $2, $3)", item.URL, item.Shortcut, item.Desc)
+		tx.MustExec("INSERT INTO items (url, shortcut, desc, uuid) VALUES ($1, $2, $3, $4)", item.URL, item.Shortcut, item.Desc, r.Header.Get("X-User-UUID"))
 		tx.Commit()
 
 		db.Close()
@@ -63,7 +64,7 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&item)
 		check(err)
 		tx := db.MustBegin()
-		tx.MustExec("UPDATE items SET url = $1, desc = $2 WHERE shortcut = $3", item.URL, item.Desc, item.Shortcut)
+		tx.MustExec("UPDATE items SET url = $1, desc = $2 WHERE shortcut = $3 and uuid = $4", item.URL, item.Desc, item.Shortcut, r.Header.Get("X-User-UUID"))
 		tx.Commit()
 		db.Close()
 	case "DELETE":
@@ -72,7 +73,7 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&item)
 		check(err)
 		tx := db.MustBegin()
-		tx.MustExec("DELETE FROM items WHERE shortcut = $1", item.Shortcut)
+		tx.MustExec("DELETE FROM items WHERE shortcut = $1 and uuid = $2", item.Shortcut, r.Header.Get("X-User-UUID"))
 		tx.Commit()
 		db.Close()
 	default:
@@ -81,6 +82,7 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Println("It's work on http://localhost:3333")
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", getRoot)
 	mux.HandleFunc("/items", getItems)

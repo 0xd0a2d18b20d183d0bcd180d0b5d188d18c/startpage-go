@@ -41,8 +41,14 @@
         form.onsubmit = submit
         const info = document.getElementById("div")
 
+        let params = new URLSearchParams(location.search);
+
         var data
-        fetch('/items').then((response) => response.json())
+        fetch('/items', {
+            headers: {
+                "X-User-UUID": params.get('uuid'),
+            }
+        }).then((response) => response.json())
             .then(function (json) {
                 data = json
 
@@ -75,6 +81,7 @@
                 fetch('/items', {
                     method: 'POST',
                     headers: {
+                        "X-User-UUID": params.get('uuid'),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -97,6 +104,7 @@
                 fetch('/items', {
                     method: 'PUT',
                     headers: {
+                        "X-User-UUID": params.get('uuid'),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -113,6 +121,7 @@
                 fetch('/items', {
                     method: 'DELETE',
                     headers: {
+                        "X-User-UUID": params.get('uuid'),
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
@@ -137,6 +146,14 @@
             }
             input.value = ""
             event.preventDefault()
+        }
+
+        if (params.get('uuid') == null) {
+            params.set('uuid', self.crypto.randomUUID());
+            var newUrl = window.location.origin
+                + window.location.pathname
+                + '?' + params.toString();
+            window.history.pushState({ path: newUrl }, '', newUrl);
         }
     </script>
 </body>
