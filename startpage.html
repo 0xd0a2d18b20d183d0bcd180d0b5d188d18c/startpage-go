@@ -139,7 +139,7 @@
                     input.value = url
                     return false
                 }
-                if (!url.toString().startsWith("https://") || !url.toString().startsWith("http://")) {
+                if (!url.toString().startsWith("https://") && !url.toString().startsWith("http://")) {
                     url = "https://" + url
                 }
                 window.open(url, "_self")
