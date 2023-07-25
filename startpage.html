@@ -7,14 +7,16 @@
     <style>
         body {
             background-color: rgb(29, 29, 29);
-            width: 98.8%;
         }
 
         input {
             background-color: rgb(29, 29, 29);
             border-color: rgb(29, 29, 29);
             color: lightgray;
-            width: 100%;
+        }
+
+        #input {
+            width: 99.5%;
         }
 
         p {
@@ -30,6 +32,7 @@
 <body>
     <form id="form">
         <input id="input" type="text" autofocus />
+        <input type="submit">
     </form>
     <details>
         <summary>Info</summary>
@@ -41,10 +44,31 @@
         <p><code>-u -s new_example_shortcut -u new_example_url -d new_example_description</code></p>
         <p><code>-d -s example_shortcut</code></p>
     </details>
+    <details>
+        <summary>Editor</summary>
+        <form id="editor">
+            <input type="radio" id="add" checked>
+            <label for="add">Add</label></br>
+            <input type="radio" id="update">
+            <label for="update">Update</label></br>
+            <input type="radio" id="delete">
+            <label for="delete">Delete</label></br>
+
+            <input id="editor_shortcut" type="text" />
+            <label for="editor_shortcut">Shortcut</label></br>
+            <input id="editor_url" type="text" />
+            <label for="editor_url">URL</label></br>
+            <input id="editor_desc" type="text" />
+            <label for="editor_desc">Description</label></br>
+            <input type="submit">
+        </form>
+    </details>
     <script>
         const input = document.getElementById("input")
         const form = document.getElementById("form")
         form.onsubmit = submit
+        const editor = document.getElementById("editor")
+        editor.onsubmit = submitEditor
         const info = document.getElementById("div")
 
         let params = new URLSearchParams(location.search);
@@ -64,6 +88,52 @@
                     info.appendChild(forInsert)
                 }
             })
+
+        function submitEditor(event) {
+            console.log("here")
+            if (document.getElementById("add").checked) {
+                fetch('/items', {
+                    method: 'POST',
+                    headers: {
+                        "X-User-UUID": params.get('uuid'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Shortcut": document.getElementById("editor_shortcut").value,
+                        "URL": document.getElementById("editor_url").value,
+                        "Desc": document.getElementById("editor_desc").value
+                    })
+                })
+            } else if (document.getElementById("update").checked) {
+                fetch('/items', {
+                    method: 'PUT',
+                    headers: {
+                        "X-User-UUID": params.get('uuid'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Shortcut": document.getElementById("editor_shortcut").value,
+                        "URL": document.getElementById("editor_url").value,
+                        "Desc": document.getElementById("editor_desc").value
+                    })
+                })
+            } else if (document.getElementById("delete").checked) {
+                fetch('/items', {
+                    method: 'DELETE',
+                    headers: {
+                        "X-User-UUID": params.get('uuid'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Shortcut": document.getElementById("editor_shortcut").value
+                    })
+                })
+            }
+            return false
+        }
 
         function submit(event) {
             input.value = input.value + " "
