@@ -64,7 +64,7 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&item)
 		check(err)
 		tx := db.MustBegin()
-		tx.MustExec("UPDATE items SET url = $1, desc = $2 WHERE shortcut = $3 and uuid = $4", item.URL, item.Desc, item.Shortcut, r.Header.Get("X-User-UUID"))
+		tx.MustExec("UPDATE items SET url = $1, desc = $2, shortcut = $3 WHERE id = $4 and uuid = $5", item.URL, item.Desc, item.Shortcut, item.Id, r.Header.Get("X-User-UUID"))
 		tx.Commit()
 		db.Close()
 	case "DELETE":
@@ -73,7 +73,7 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&item)
 		check(err)
 		tx := db.MustBegin()
-		tx.MustExec("DELETE FROM items WHERE shortcut = $1 and uuid = $2", item.Shortcut, r.Header.Get("X-User-UUID"))
+		tx.MustExec("DELETE FROM items WHERE id = $1 and uuid = $2", item.Id, r.Header.Get("X-User-UUID"))
 		tx.Commit()
 		db.Close()
 	default:

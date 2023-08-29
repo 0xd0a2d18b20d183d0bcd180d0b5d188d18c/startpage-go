@@ -110,6 +110,13 @@
                     })
                 })
             } else if (document.getElementById("update").checked) {
+
+                for (key in data.Value) {
+                    if (document.getElementById("editor_shortcut").value == data.Value[key].Shortcut) {
+                        id = data.Value[key].Id
+                    }
+                }
+
                 fetch('/items', {
                     method: 'PUT',
                     headers: {
@@ -118,12 +125,20 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
+                        "Id": id,
                         "Shortcut": document.getElementById("editor_shortcut").value,
                         "URL": document.getElementById("editor_url").value,
                         "Desc": document.getElementById("editor_desc").value
                     })
                 })
             } else if (document.getElementById("delete").checked) {
+
+                for (key in data.Value) {
+                    if (document.getElementById("editor_shortcut").value == data.Value[key].Shortcut) {
+                        id = data.Value[key].Id
+                    }
+                }
+
                 fetch('/items', {
                     method: 'DELETE',
                     headers: {
@@ -132,7 +147,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        "Shortcut": document.getElementById("editor_shortcut").value
+                        "Id": id
                     })
                 })
             }
