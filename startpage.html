@@ -19,7 +19,7 @@
             width: 99.5%;
         }
 
-        p {
+        p, a {
             color: lightgray;
         }
 
@@ -84,7 +84,11 @@
 
                 for (key in data.Value) {
                     var forInsert = document.createElement("p")
-                    forInsert.innerHTML = data.Value[key].Shortcut + " - " + data.Value[key].Desc
+                    var url = data.Value[key].URL
+                    if (!url.toString().startsWith("https://") && !url.toString().startsWith("http://")) {
+                        url = "https://" + url
+                    }
+                    forInsert.innerHTML = "<a href='" + url + "'>" + data.Value[key].Shortcut + "</a>" + " - " + data.Value[key].Desc
                     info.appendChild(forInsert)
                 }
             })
