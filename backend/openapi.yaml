@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Startpage API
+  description: A Startpage API
+paths:
+  /items:
+    get:
+      description: Returns a list of items
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+             examples:
+              foo:
+                value:
+                  {
+                    [
+                      
+                    ]
+                  }
+    post:
+      description: Returns a list of items
+      responses:
+        '200':
+          description: Successful response
+    put:
+      description: Returns a list of items
+      responses:
+        '200':
+          description: Successful response
+    delete:
+      description: Returns a list of items
+      responses:
+        '200':
+          description: Successful response
+  /:
+    get:
+      description: Returns a list of items
+      responses:
+        '200':
+          description: Successful response

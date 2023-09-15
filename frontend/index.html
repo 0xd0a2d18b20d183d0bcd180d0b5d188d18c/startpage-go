@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Startpage</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            background-color: rgb(29, 29, 29);
+        }
+
+        input {
+            background-color: rgb(29, 29, 29);
+            border-color: rgb(29, 29, 29);
+            color: lightgray;
+        }
+
+        #input {
+            width: 99.5%;
+        }
+
+        p,
+        a {
+            color: lightgray;
+        }
+
+        details {
+            color: lightgray;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="form">
+        <input id="input" type="text" autofocus />
+        <input type="submit">
+    </form>
+    <details>
+        <summary>Info</summary>
+        <div id="div"></div>
+    </details>
+    <details>
+        <summary>Editor</summary>
+        <form id="editor">
+            <input type="radio" id="add" name="type" checked>
+            <label for="add">Add</label></br>
+            <input type="radio" id="delete" name="type">
+            <label for="delete">Delete</label></br>
+            <input id="editor_shortcut" type="text" />
+            <label for="editor_shortcut">Shortcut</label></br>
+            <input id="editor_url" type="text" />
+            <label for="editor_url">URL</label></br>
+            <input id="editor_desc" type="text" />
+            <label for="editor_desc">Description</label></br>
+            <input type="submit">
+        </form>
+    </details>
+    <script>
+        let params = new URLSearchParams(location.search);
+
+        if (params.get('uuid') == null) {
+            params = setUuidUrl(params)
+        }
+
+        const input = document.getElementById("input")
+        const form = document.getElementById("form")
+        const editor = document.getElementById("editor")
+        const info = document.getElementById("div")
+        editor.onsubmit = submitEditor
+        form.onsubmit = submit
+
+        var data
+
+        fetch('/items', {
+            headers: {
+                "X-User-UUID": params.get('uuid'),
+            }
+        }).then((response) => response.json())
+            .then(function (json) {
+                data = json
+                updateInfoSection(data)
+            })
+
+
+        function setUuidUrl(params) {
+            params.set('uuid', self.crypto.randomUUID());
+            var newUrl = window.location.origin
+                + window.location.pathname
+                + '?' + params.toString();
+            window.history.pushState({ path: newUrl }, '', newUrl);
+            return params
+        }
+
+        function updateInfoSection(data) {
+            for (key in data.Value) {
+                var forInsert = document.createElement("p")
+                var url = checkHttpsContains(data.Value[key].URL)
+                forInsert.innerHTML = "<a href='" + url + "'>" +
+                    data.Value[key].Shortcut + "</a>" + " - " + data.Value[key].Desc
+                info.appendChild(forInsert)
+            }
+        }
+
+        function checkHttpsContains(url) {
+            if (!url.toString().startsWith("https://") && !url.toString().startsWith("http://")) {
+                url = "https://" + url
+            }
+            return url
+        }
+
+        function submitEditor(event) {
+            if (document.getElementById("add").checked) {
+                fetch('/items', {
+                    method: 'POST',
+                    headers: {
+                        "X-User-UUID": params.get('uuid'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Shortcut": document.getElementById("editor_shortcut").value,
+                        "URL": document.getElementById("editor_url").value,
+                        "Desc": document.getElementById("editor_desc").value
+                    })
+                })
+            } else if (document.getElementById("delete").checked) {
+                fetch('/items', {
+                    method: 'DELETE',
+                    headers: {
+                        "X-User-UUID": params.get('uuid'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Shortcut": document.getElementById("editor_shortcut").value
+                    })
+                })
+            }
+            document.getElementById("editor_shortcut").value = ""
+            document.getElementById("editor_url").value = ""
+            document.getElementById("editor_desc").value = ""
+            event.preventDefault()
+        }
+
+        function submit(event) {
+            input.value = input.value + " "
+            var shortcut = input.value.split(" ", 1)
+            var args = input.value.replace(shortcut + " ", "")
+            var url = shortcut
+            var isRawURL = true
+            for (key in data.Value) {
+                if (shortcut[0] == data.Value[key].Shortcut) {
+                    url = data.Value[key].URL + args
+                    isRawURL = false
+                    break
+                }
+            }
+            if (isRawURL && !url.toString().includes(".")) {
+                return false
+            }
+            window.open(checkHttpsContains(url), "_self")
+            event.preventDefault()
+        }
+    </script>
+</body>
+
+</html>
